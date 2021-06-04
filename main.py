@@ -1,5 +1,4 @@
 from pipeline import Pipeline
-from math import pow
 
 DEBUG = True
 
