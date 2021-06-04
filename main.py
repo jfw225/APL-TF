@@ -1,16 +1,36 @@
-# This is a sample Python script.
+from pipeline import Pipeline
+from math import pow
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+DEBUG = True
+
+class TestPipe(Pipeline):
+    def __init__(self, source):
+        super().__init__(source)
+
+    def map(self, data):
+        if DEBUG:
+            print("Source: " + str(self.source) + " | Data: " + str(data))
+
+        return (data + self.source) ** self.source
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharms')
+    p1 = TestPipe(1)
+    p2 = TestPipe(2)
+    p3 = TestPipe(3)
+    pl1 = p1 >> p2 >> p3
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    p1 = TestPipe(1)
+    p2 = TestPipe(2)
+    p3 = TestPipe(3)
+    pl2 = p1 >> p3 >> p2
+
+    print('--')
+    test_val = 2
+
+    res1 = pl1.map(test_val)
+    res2 = pl2.map(test_val)
+
+    print("To show that commutativity is not preserved:")
+    print(f"pl1 = p1 >> p2 >> p3; pl1({test_val}) = {res1}")
+    print(f"pl2 = p1 >> p3 >> p2; pl2({test_val}) = {res2}")
