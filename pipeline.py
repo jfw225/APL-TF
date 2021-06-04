@@ -1,14 +1,26 @@
 class Pipeline(object):
     """Pipeline class for individual input-based submission to the pipeline."""
 
-    def __init__(self, source=None):
+    class Empty:
+        pass
+
+    class Skip:
+        pass
+
+    class Stop:
+        pass
+
+    def __init__(self, source=list()):
         self.source = source
 
     def __rshift__(self, other):
         """Allows Pipeline objects to connect using the `>>` operator."""
 
-        other.map = self.create_map(other.map)
-        return other
+        if other is not None:
+            other.map = self.create_map(other.map)
+            return other
+        else:
+            return self
 
     def create_map(self, other_map):
         """Returns a new map function that calls self.map and forward its return value to other_map."""
@@ -17,7 +29,7 @@ class Pipeline(object):
 
             data = self.map(data)
 
-            return other_map(data)
+            return other_map(data) if data != Pipeline.Skip else Pipeline.Empty
 
         return map
 
@@ -28,6 +40,11 @@ class Pipeline(object):
 
     def filter(self, data):
         """Overwrite to filter out the pipeline data."""
+
+        return True
+
+    def is_working(self):
+        """Overwrite to determine how execution terminates."""
 
         return True
 
