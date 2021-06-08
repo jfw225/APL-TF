@@ -1,9 +1,9 @@
 from pipeline import Pipeline
-from async_predictor import AsyncPredictor
+from async_worker import AsyncWorker
 
-class AsyncPredict(Pipeline):
+class AsyncWork(Pipeline):
     def __init__(self, num_gpus: int = 0, num_cpus: int = 0):
-        self.predictor = AsyncPredictor(num_gpus, num_cpus)
+        self.predictor = AsyncWorker(num_gpus, num_cpus)
 
         super().__init__()
 

@@ -3,13 +3,14 @@ from multiprocessing import Process, Queue, cpu_count
 import torch
 
 from time import sleep
+
 def some_function(data):
     print("Current Data: " + str(data))
     sleep(.1)
     return data * data
 
-class AsyncPredictor:
-    """The asynchronous predictor."""
+class AsyncWorker:
+    """The asynchronous worker."""
 
     class _Worker(Process):
         def __init__(self, task_queue, result_queue):
@@ -42,7 +43,7 @@ class AsyncPredictor:
         ## Create CPU Workers
         for _ in range(num_cpus if num_cpus >= 0 else 0):
             self.workers.append(
-                AsyncPredictor._Worker(self.task_queue, self.result_queue)
+                AsyncWorker._Worker(self.task_queue, self.result_queue)
             )
 
         ## Start the Jobs

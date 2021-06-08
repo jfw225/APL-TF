@@ -1,8 +1,12 @@
 from pipeline import Pipeline
-from async_predict import AsyncPredict
+from async_work import AsyncWork
 from input_capture import InputCapture
+from testpipe import TestPipe1
+
 import multiprocessing as mp
 from collections import deque
+
+
 
 
 def main():
@@ -13,9 +17,12 @@ def main():
     ic = InputCapture(q)
 
     ## Predictor
-    predict = AsyncPredict(num_gpus=0, num_cpus=1)
+    predict = AsyncWork(num_gpus=0, num_cpus=5)
 
-    pl = ic >> predict >> Pipeline()
+    ## Test Pipe
+    tp = TestPipe1()
+
+    pl = ic >> predict >> tp
 
     results = list()
     while ic.is_working() or predict.is_working():
