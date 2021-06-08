@@ -1,8 +1,9 @@
-from pipeline import Pipeline
-from async_worker import AsyncWorker
+from pipeline.pipeline import Pipeline
+from pipeline.libs.async_predictor import AsyncWorker
 
-class AsyncWork(Pipeline):
-    def __init__(self, num_gpus: int = 0, num_cpus: int = 0):
+
+class AsyncPredict(Pipeline):
+    def __init__(self, num_gpus: int = 1, num_cpus: int = 1, queue_size: int = 3, ordered=True):
         self.predictor = AsyncWorker(num_gpus, num_cpus)
 
         super().__init__()

@@ -1,10 +1,23 @@
 import os
+from tqdm import tqdm
+from multiprocessing import set_start_method
+
+from pipeline.pipeline import Pipeline
+from pipeline.image_input import ImageInput
+from pipeline.async_predict import AsyncPredict
+from pipeline.predict import Predict
+from pipeline.seperate_background import SeperateBackground
+from pipeline.annotate_image import AnnotateImage
+from pipeline.image_output import ImageOutput
+from pipeline.utils.detectron import setup_cfg
+
 
 def parse_args():
     import argparse
 
     # Parse command line arguments
-    ap = argparse.ArgumentParser(description="Detectron2 Image Processing Pipeline")
+    ap = argparse.ArgumentParser(
+        description="Detectron2 Image Processing Pipeline")
     ap.add_argument("-i", "--input", required=True,
                     help="path to input image file or directory")
     ap.add_argument("-o", "--output", default="output",
@@ -37,9 +50,59 @@ def parse_args():
 
     return ap.parse_args()
 
+
 def main(args):
-    # print(args.__dict__)
-    pass
+    # Create output directory if needed
+    os.makedirs(args.output, exist_ok=True)
+
+    # Create pipeline tasks
+    # temporary image input for testing
+    image_input = ImageInput()
+
+    cfg = setup_cfg(config_file=args.config_file,
+                    weights_file=args.weights_file,
+                    config_opts=args.config_opts,
+                    confidence_threshold=args.confidence_threshold,
+                    cpu=False if args.gpus > 0 else True)
+
+    if not args.single_process:
+        set_start_method("spawn", force=True)
+        predict = AsyncPredict(cfg,
+                               num_gpus=args.gpus,
+                               num_cpus=args.cpus,
+                               queue_size=args.queue_size,
+                               ordered=False)
+    else:
+        predict = Predict(cfg)
+
+    if args.seperate_background:
+        annotate_image = None
+        seperate_background = SeperateBackground("vis_image")
+    else:
+        seperate_background = None
+        metadata_name = cfg.DATASETS.TEST[0] if len(
+            cfg.DATASETS.TEST) else "__unused"
+        annotate_image = AnnotateImage("vis_image", metadata_name)
+
+    # temp image output for testing
+    image_output = ImageOutput()
+
+    # Create the image processing pipeline
+    pipeline = (image_input
+                >> predict
+                >> seperate_background
+                >> annotate_image
+                >> image_output)
+
+    # Main Loop
+    results = list()
+    while image_input.is_working() or predict.is_working():
+        if (result := pipeline.map(None)) != Pipeline.Empty:
+            results.append(result)
+
+    predict.cleanup()
+    print("Results: " + str(result))
+
 
 if __name__ == '__main__':
     args = parse_args()

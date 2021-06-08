@@ -1,13 +1,15 @@
-from pipeline import Pipeline
+from pipeline.pipeline import Pipeline
 from multiprocessing import Process, Queue, cpu_count
 import torch
 
 from time import sleep
 
+
 def some_function(data):
     print("Current Data: " + str(data))
     sleep(.1)
     return data * data
+
 
 class AsyncWorker:
     """The asynchronous worker."""
@@ -22,7 +24,7 @@ class AsyncWorker:
         def run(self):
             while (task := self.task_queue.get()) != Pipeline.Stop:
                 data = task
-                result = some_function(data) ## replace this with analysis
+                result = some_function(data)  # replace this with analysis
                 self.result_queue.put(result)
 
     def __init__(self, num_gpus: int = 0, num_cpus: int = 0):
@@ -36,17 +38,17 @@ class AsyncWorker:
         self.result_queue = Queue()
         self.workers = list()
 
-        ## Create GPU Workers
+        # Create GPU Workers
         for gpuid in range(num_gpus if num_gpus >= 0 else 0):
             pass
 
-        ## Create CPU Workers
+        # Create CPU Workers
         for _ in range(num_cpus if num_cpus >= 0 else 0):
             self.workers.append(
                 AsyncWorker._Worker(self.task_queue, self.result_queue)
             )
 
-        ## Start the Jobs
+        # Start the Jobs
         for w in self.workers:
             w.start()
 
