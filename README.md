@@ -1,4 +1,4 @@
-# APL-TF
+# Real Time Detectron2 Implementation Using Pipelines
 
 Inspired by [jagin's](https://github.com/jagin/detectron2-pipeline) pipeline implementation.
  
