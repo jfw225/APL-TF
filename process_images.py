@@ -13,6 +13,8 @@ from pipeline.utils.detectron import setup_cfg
 
 
 def parse_args():
+    """ Parses command line arguments. """
+
     import argparse
 
     # Parse command line arguments
@@ -52,12 +54,17 @@ def parse_args():
 
 
 def main(args):
+    """ The main function for image processing. """
+
     # Create output directory if needed
     os.makedirs(args.output, exist_ok=True)
 
+    # Image output type
+    output_type = "vis_image"
+
     # Create pipeline tasks
     # temporary image input for testing
-    image_input = ImageInput()
+    image_input = ImageInput(args.input)
 
     cfg = setup_cfg(config_file=args.config_file,
                     weights_file=args.weights_file,
@@ -77,15 +84,15 @@ def main(args):
 
     if args.seperate_background:
         annotate_image = None
-        seperate_background = SeperateBackground("vis_image")
+        seperate_background = SeperateBackground(output_type)
     else:
         seperate_background = None
         metadata_name = cfg.DATASETS.TEST[0] if len(
             cfg.DATASETS.TEST) else "__unused"
-        annotate_image = AnnotateImage("vis_image", metadata_name)
+        annotate_image = AnnotateImage(output_type, metadata_name)
 
     # temp image output for testing
-    image_output = ImageOutput()
+    image_output = ImageOutput(output_type, args.output)
 
     # Create the image processing pipeline
     pipeline = (image_input
@@ -101,7 +108,7 @@ def main(args):
             results.append(result)
 
     predict.cleanup()
-    print("Results: " + str(result))
+    # print("Results: " + str(result))
 
 
 if __name__ == '__main__':

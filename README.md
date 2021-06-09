@@ -2,4 +2,7 @@
 
 Inspired by [jagin's](https://github.com/jagin/detectron2-pipeline) pipeline implementation.
  
-main.py contains a basic test of the pipeline that shows the result is dependent on the order of the pipes.
+Currently only works with single cpu/gpu.
+
+Test image prediction by running:
+```python .\process_images.py -i assets/images/ -p --single-process```
